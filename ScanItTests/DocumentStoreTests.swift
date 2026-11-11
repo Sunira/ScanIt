@@ -25,7 +25,8 @@ struct DocumentStoreTests {
         let document = try await store.createDocument(images: images, source: .camera)
 
         #expect(document.sortedPages.map(\.index) == [0, 1])
-        #expect(document.sortedPages.allSatisfy { $0.imageData != nil })
+        let everyPageHasImage = document.sortedPages.allSatisfy { $0.imageData != nil }
+        #expect(everyPageHasImage)
         #expect(document.thumbnailData != nil)
         #expect(document.aiStatus == .pending)
         #expect(document.source == .camera)
@@ -64,7 +65,8 @@ struct DocumentStoreTests {
         let documents = try await store.importImages(photos, source: .photos)
 
         #expect(documents.count == 2)
-        #expect(documents.allSatisfy { $0.pageCount == 1 && $0.source == .photos })
+        let allSinglePagePhotos = documents.allSatisfy { $0.pageCount == 1 && $0.source == .photos }
+        #expect(allSinglePagePhotos)
     }
 
     @Test func importsAnImageFile() async throws {
@@ -94,7 +96,8 @@ struct DocumentStoreTests {
 
         let categories = try container.mainContext.fetch(FetchDescriptor<ScanIt.Category>(sortBy: [SortDescriptor(\.sortOrder)]))
         #expect(categories.map(\.key) == StarterCategories.all.map(\.id))
-        #expect(categories.allSatisfy(\.isBuiltIn))
+        let allBuiltIn = categories.allSatisfy { $0.isBuiltIn }
+        #expect(allBuiltIn)
     }
 
     @Test func filtersDocumentsByCategory() async throws {
