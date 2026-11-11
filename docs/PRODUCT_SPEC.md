@@ -1,6 +1,6 @@
 # ScanIt — Product Spec
 
-Status: **Product decisions agreed.** Look & feel: not decided yet. No code until every decision is made.
+Status: see bottom of document.
 
 ## Purpose
 An app for iPhone, iPad and Mac that scans documents and photos. AI reads each scan, classifies it and pulls out the key details, and everything goes into a searchable library that a family can share.
@@ -42,5 +42,19 @@ An app for iPhone, iPad and Mac that scans documents and photos. AI reads each s
 ## Technical direction (proposed)
 SwiftUI, SwiftData + CloudKit, VisionKit (document camera), Vision (text recognition), SQLite FTS for keyword search, Claude API for classification, extraction and descriptions, LocalAuthentication, EventKit.
 
-## Open — look & feel (next step)
-Visual style, colors and theme, app icon, navigation structure, main screens, scanning flow, how results are shown after a scan.
+## Look & feel decisions
+
+| # | Topic | Decision |
+|---|-------|----------|
+| L1 | Visual style | Native Apple style with the iOS 26 Liquid Glass look, like Notes and Files |
+| L2 | Navigation | Bottom tab bar: Documents, Search, Family (V2), Settings. A floating Scan button is always visible. On iPad and Mac the tabs become a sidebar |
+| L3 | Documents tab | List with thumbnails: page preview, title, category color tag, date, key detail (e.g. amount). Category filter chips at the top |
+| L4 | After a scan | Live result card: saved right away, then category, title and details fill in as the AI works. Buttons for "Add reminder?", Edit and Scan more |
+| L5 | Document screen | Page image at the top (swipe through pages), then summary, extracted details, tags and full text you can expand. Share and more actions in the toolbar |
+| L6 | Search tab | Separate Search and Ask modes with a switch. Search shows keyword results and filter chips (Category, Person, Date, Amount). Ask (V2) is a chat-style question-and-answer screen |
+| L7 | Accent color | Teal / green. Each category also has its own color tag |
+| L8 | Appearance | Follows the system's light or dark setting, with an override in Settings |
+| L9 | App icon | Teal camera-viewfinder corners framing a small page or sparkle |
+| L10 | Onboarding | Three short screens: welcome, Face ID lock, API key (can be skipped) |
+
+Status: **All product and look-and-feel decisions made.** Ready for build planning.
