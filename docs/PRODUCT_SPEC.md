@@ -54,7 +54,7 @@ SwiftUI, SwiftData + CloudKit, VisionKit (document camera), Vision (text recogni
 | L6 | Search tab | Separate Search and Ask modes with a switch. Search shows keyword results and filter chips (Category, Person, Date, Amount). Ask (V2) is a chat-style question-and-answer screen |
 | L7 | Accent color | Teal / green. Each category also has its own color tag |
 | L8 | Appearance | Follows the system's light or dark setting, with an override in Settings |
-| L9 | App icon | Teal camera-viewfinder corners framing a small page or sparkle |
+| L9 | App icon | Teal-to-blue gradient; white viewfinder corners framing a page with a folded corner, a cyan scan line, and an AI chip with connected dots (light and dark versions) |
 | L10 | Onboarding | Three short screens: welcome, Face ID lock, API key (can be skipped) |
 
 Status: **All product and look-and-feel decisions made.** Ready for build planning.
