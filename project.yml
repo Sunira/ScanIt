@@ -30,6 +30,7 @@ targets:
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        INFOPLIST_KEY_NSCameraUsageDescription: "ScanIt uses the camera to scan your documents."
         CODE_SIGN_STYLE: Automatic
   ScanItTests:
     type: bundle.unit-test

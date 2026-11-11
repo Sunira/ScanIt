@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 /// The Settings tab. Most rows become live in later milestones (noted beside each).
@@ -31,13 +32,15 @@ struct SettingsView: View {
 
 /// Lists the categories. Editing arrives in M4.
 struct CategoriesView: View {
+    @Query(sort: \Category.sortOrder) private var categories: [Category]
+
     var body: some View {
-        List(StarterCategories.all) { category in
+        List(categories) { category in
             Label {
                 Text(category.name)
             } icon: {
                 Image(systemName: category.symbol)
-                    .foregroundStyle(category.foreground)
+                    .foregroundStyle(category.style.foreground)
             }
         }
         .navigationTitle("Categories")
@@ -54,4 +57,5 @@ extension Bundle {
 
 #Preview {
     SettingsView()
+        .modelContainer(try! AppSchema.makeContainer(inMemory: true))
 }
