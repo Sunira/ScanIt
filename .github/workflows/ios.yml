@@ -51,6 +51,15 @@ jobs:
             | tee xcodebuild.log | grep -E "error:|warning:|Test |\*\* (BUILD|TEST)" || true
           grep -q "\*\* TEST SUCCEEDED \*\*" xcodebuild.log
 
+      - name: Summarize errors and warnings
+        if: always()
+        run: |
+          echo "::group::Unique errors"
+          grep -E "error:" xcodebuild.log | sed -E 's/^.*\/(ScanIt|ScanItTests)\//\1\//' | sort -u | head -50 || true
+          echo "::endgroup::"
+          echo "Project warnings:"
+          grep -E "warning:" xcodebuild.log | grep -E "/(ScanIt|ScanItTests)/" | sed -E 's/^.*\/(ScanIt|ScanItTests)\//\1\//' | sort -u | head -50 || true
+
       - name: Upload build log
         if: failure()
         uses: actions/upload-artifact@v4

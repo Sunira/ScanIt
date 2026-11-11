@@ -37,7 +37,7 @@ struct DocumentStoreTests {
 
     @Test func rejectsAnEmptyScan() async {
         await #expect(throws: ImportError.noPages) {
-            try await store.createDocument(images: [], source: .camera)
+            _ = try await store.createDocument(images: [], source: .camera)
         }
     }
 
@@ -53,7 +53,7 @@ struct DocumentStoreTests {
 
     @Test func rejectsAnUnreadablePDF() async {
         await #expect(throws: ImportError.unreadablePDF("Broken")) {
-            try await store.importPDF(data: Data("nope".utf8), title: "Broken", source: .files)
+            _ = try await store.importPDF(data: Data("nope".utf8), title: "Broken", source: .files)
         }
     }
 
