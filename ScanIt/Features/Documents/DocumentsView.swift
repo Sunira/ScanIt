@@ -42,11 +42,12 @@ struct DocumentsView: View {
                 }
         }
         .fullScreenCover(isPresented: $showingScanner) {
-            DocumentScannerView { outcome in
+            DocumentScanner { images in
                 showingScanner = false
-                handleScan(outcome)
+                save { [try await store.createDocument(images: images, source: .camera)] }
+            } onCancel: {
+                showingScanner = false
             }
-            .ignoresSafeArea()
         }
         .photosPicker(isPresented: $showingPhotoPicker, selection: $photoItems,
                       maxSelectionCount: 20, matching: .images)
@@ -133,21 +134,10 @@ struct DocumentsView: View {
     // MARK: Actions
 
     private func startScan() {
-        if DocumentScannerView.isSupported {
+        if DocumentScanner.isSupported {
             showingScanner = true
         } else {
             showingScannerUnavailable = true
-        }
-    }
-
-    private func handleScan(_ outcome: ScanOutcome) {
-        switch outcome {
-        case .finished(let images):
-            save { [try await store.createDocument(images: images, source: .camera)] }
-        case .cancelled:
-            break
-        case .failed(let error):
-            errorMessage = error.localizedDescription
         }
     }
 

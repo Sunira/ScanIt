@@ -33,3 +33,13 @@ struct ImageProcessingTests {
         #expect(PDFRendering.renderPages(from: Data("not a pdf".utf8)) == nil)
     }
 }
+
+struct RotationTests {
+    @Test func quarterTurnSwapsSides() {
+        let image = TestImages.solid(.red, size: CGSize(width: 300, height: 200))
+        let turned = ImageProcessing.rotated(image, quarterTurns: 1)
+        #expect(turned.size == CGSize(width: 200, height: 300))
+        #expect(ImageProcessing.rotated(image, quarterTurns: 4).size == image.size)
+        #expect(ImageProcessing.rotated(image, quarterTurns: -1).size == CGSize(width: 200, height: 300))
+    }
+}

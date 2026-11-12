@@ -36,6 +36,24 @@ enum ImageProcessing {
     static func thumbnail(_ image: UIImage) -> Data? {
         resized(image, maxDimension: thumbnailMaxDimension).jpegData(compressionQuality: 0.7)
     }
+
+    /// Turns an image a quarter turn at a time (positive = clockwise), keeping it `.up`.
+    static func rotated(_ image: UIImage, quarterTurns: Int) -> UIImage {
+        let turns = ((quarterTurns % 4) + 4) % 4
+        guard turns != 0 else { return image }
+        let size = turns % 2 == 1 ? CGSize(width: image.size.height, height: image.size.width) : image.size
+
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = image.scale
+        format.opaque = true
+        return UIGraphicsImageRenderer(size: size, format: format).image { context in
+            let cg = context.cgContext
+            cg.translateBy(x: size.width / 2, y: size.height / 2)
+            cg.rotate(by: CGFloat(turns) * .pi / 2)  // UIKit's y axis points down, so positive is clockwise
+            image.draw(in: CGRect(x: -image.size.width / 2, y: -image.size.height / 2,
+                                  width: image.size.width, height: image.size.height))
+        }
+    }
 }
 
 /// Turns PDF pages into images.
