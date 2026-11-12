@@ -16,7 +16,10 @@ struct ScanItApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
-                .task { DocumentStore(context: container.mainContext).seedCategoriesIfNeeded() }
+                .task {
+                    DocumentStore(context: container.mainContext).seedCategoriesIfNeeded()
+                    await TextIndexer.shared.catchUp(context: container.mainContext)
+                }
         }
         .modelContainer(container)
     }

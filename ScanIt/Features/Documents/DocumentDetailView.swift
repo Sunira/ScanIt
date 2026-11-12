@@ -19,6 +19,7 @@ struct DocumentDetailView: View {
                 pageCarousel
                 header
                 aiPlaceholder
+                recognizedText
             }
             .padding(Metrics.screenPadding)
         }
@@ -50,7 +51,7 @@ struct DocumentDetailView: View {
         .onDisappear {
             // Delete after leaving the screen so it never shows a deleted document.
             if deleteOnDisappear {
-                DocumentStore(context: modelContext).delete(document)
+                DocumentStore(context: modelContext, indexer: .shared).delete(document)
             }
         }
     }
@@ -91,6 +92,25 @@ struct DocumentDetailView: View {
             }
             .font(.subheadline)
             .foregroundStyle(.secondary)
+        }
+    }
+
+    @ViewBuilder
+    private var recognizedText: some View {
+        if let text = document.ocrText {
+            DisclosureGroup("Full text") {
+                Text(text.isEmpty ? "No text was found on this document." : text)
+                    .font(.subheadline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .textSelection(.enabled)
+                    .padding(.top, 8)
+            }
+            .padding(16)
+            .background(Color(.secondarySystemGroupedBackground), in: .rect(cornerRadius: Metrics.cornerRadius))
+        } else {
+            Label("Reading text…", systemImage: "text.viewfinder")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
     }
 

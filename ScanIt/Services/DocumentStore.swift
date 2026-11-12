@@ -48,9 +48,12 @@ enum DocumentFilter {
 @MainActor
 final class DocumentStore {
     let context: ModelContext
+    /// Reads and indexes the text of new documents. Nil in tests that don't need it.
+    let indexer: TextIndexer?
 
-    init(context: ModelContext) {
+    init(context: ModelContext, indexer: TextIndexer? = nil) {
         self.context = context
+        self.indexer = indexer
     }
 
     // MARK: Creating
@@ -74,6 +77,9 @@ final class DocumentStore {
         context.insert(document)
         document.pages = encoded.pages.enumerated().map { PageImage(index: $0.offset, imageData: $0.element) }
         try context.save()
+        if let indexer {
+            Task { await indexer.recognizeAndIndex(document) }
+        }
         return document
     }
 
@@ -116,6 +122,7 @@ final class DocumentStore {
     // MARK: Deleting
 
     func delete(_ document: Document) {
+        indexer?.remove(documentID: document.id)
         context.delete(document)
         try? context.save()
     }

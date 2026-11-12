@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 /// The Search tab, with separate Search and Ask modes.
@@ -9,8 +10,17 @@ struct SearchView: View {
         var id: Self { self }
     }
 
+    @Query private var documents: [Document]
+
     @State private var mode: Mode = .search
     @State private var query = ""
+    @State private var results: [Result] = []
+
+    struct Result: Identifiable {
+        let document: Document
+        let snippet: AttributedString
+        var id: UUID { document.id }
+    }
 
     var body: some View {
         NavigationStack {
@@ -35,25 +45,86 @@ struct SearchView: View {
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Search")
+            .navigationDestination(for: Document.self) { DocumentDetailView(document: $0) }
         }
     }
 
     @ViewBuilder
     private var searchContent: some View {
-        VStack {
+        VStack(spacing: 8) {
             TextField("Search every word…", text: $query)
                 .textFieldStyle(.roundedBorder)
+                .submitLabel(.search)
+                .autocorrectionDisabled()
                 .padding(.horizontal, Metrics.screenPadding)
-            if query.isEmpty {
+            if query.trimmingCharacters(in: .whitespaces).isEmpty {
                 ContentUnavailableView {
                     Label("Search your documents", systemImage: "magnifyingglass")
                 } description: {
-                    Text("Search will look through every word of your scans.")
+                    Text("Find any word in any scan, even without internet.")
                 }
-            } else {
+            } else if results.isEmpty {
                 ContentUnavailableView.search(text: query)
+            } else {
+                List(results) { result in
+                    NavigationLink(value: result.document) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(result.document.title).font(.headline).lineLimit(1)
+                            Text(result.snippet)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(3)
+                        }
+                    }
+                }
+                .listStyle(.plain)
             }
         }
+        .task(id: query) { runSearch() }
+        .onChange(of: documents.count) { runSearch() }
+    }
+
+    private func runSearch() {
+        guard let index = SearchIndex.shared,
+              let hits = try? index.search(query) else {
+            results = []
+            return
+        }
+        let byID = Dictionary(documents.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        results = hits.compactMap { hit in
+            byID[hit.documentID].map { Result(document: $0, snippet: SearchSnippet.attributed(hit.snippet)) }
+        }
+    }
+}
+
+enum SearchSnippet {
+    /// Turns an index snippet into styled text with the matched words in bold.
+    static func attributed(_ snippet: String) -> AttributedString {
+        var result = AttributedString()
+        var highlighted = false
+        let text = snippet.replacingOccurrences(of: "\n", with: " ")
+        var buffer = ""
+        func flush() {
+            guard !buffer.isEmpty else { return }
+            var piece = AttributedString(buffer)
+            if highlighted {
+                piece.font = .subheadline.bold()
+                piece.foregroundColor = .primary
+            }
+            result += piece
+            buffer = ""
+        }
+        for character in text {
+            if String(character) == SearchIndex.matchStart {
+                flush(); highlighted = true
+            } else if String(character) == SearchIndex.matchEnd {
+                flush(); highlighted = false
+            } else {
+                buffer.append(character)
+            }
+        }
+        flush()
+        return result
     }
 }
 

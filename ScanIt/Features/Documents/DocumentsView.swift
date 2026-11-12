@@ -18,7 +18,7 @@ struct DocumentsView: View {
     @State private var isSaving = false
     @State private var errorMessage: String?
 
-    private var store: DocumentStore { DocumentStore(context: modelContext) }
+    private var store: DocumentStore { DocumentStore(context: modelContext, indexer: .shared) }
     private var filteredDocuments: [Document] {
         DocumentFilter.apply(documents, categoryKey: selectedCategoryKey)
     }

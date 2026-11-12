@@ -11,12 +11,18 @@ settings:
     CURRENT_PROJECT_VERSION: "1"
     # Set your Apple Developer Team ID here (or in Xcode) before running on a device.
     DEVELOPMENT_TEAM: ""
+packages:
+  GRDB:
+    url: https://github.com/groue/GRDB.swift
+    from: 7.0.0
 targets:
   ScanIt:
     type: application
     platform: iOS
     sources:
       - path: ScanIt
+    dependencies:
+      - package: GRDB
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.sunira.scanit
