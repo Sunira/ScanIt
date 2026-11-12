@@ -30,9 +30,9 @@ struct ViewfinderGeometryTests {
 }
 
 struct ScanLookTests {
-    @Test("Color is the default, and Photo leaves the picture alone")
+    @Test("Photo is the default and leaves the picture alone")
     func photoIsUntouched() {
-        #expect(ScanLook.defaultLook == .color)
+        #expect(ScanLook.defaultLook == .photo)
         let image = UIGraphicsImageRenderer(size: CGSize(width: 4, height: 4)).image { _ in }
         #expect(ScanLook.photo.applied(to: image) === image)
     }

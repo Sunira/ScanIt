@@ -8,7 +8,7 @@ import UIKit
 enum ScanLook: String, CaseIterable, Sendable {
     case photo, color
 
-    static let defaultLook = ScanLook.color
+    static let defaultLook = ScanLook.photo
 
     var title: String {
         switch self {
