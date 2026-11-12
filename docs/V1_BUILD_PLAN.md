@@ -133,11 +133,13 @@ Each milestone ends with something you can install and try on your iPhone.
 | M0 | Project skeleton, tab bar, colors, app icon, CI | Install a shell app with the icon and tabs |
 | M1 | Scan and import, save pages, Documents list, Document screen (view only) | Scan and import, and see your documents |
 | M2 | On-device text reading + keyword search | Search any word in your scans, offline |
-| M3 | Claude classification, extracted details, photo descriptions, result card | Watch documents get sorted automatically |
+| M3 | API key entry in Settings (Keychain), Claude classification, extracted details, photo descriptions, result card | Enter your key, then watch documents get sorted automatically |
 | M4 | Editing, learned rules, category management, filters | Fix mistakes, and have ScanIt remember them |
-| M5 | Offline queue, app lock, welcome setup, Settings | Use it day to day, privately |
+| M5 | Offline queue, app lock, welcome setup (including the optional API key step), rest of Settings | Use it day to day, privately |
 | M6 | PDF export, share, print, copy, reminders, Share Extension | Get documents out, and share them in from other apps |
 | M7 | iCloud sync, polish, dark mode check, accessibility pass, TestFlight build | Install the finished V1 through TestFlight |
+
+> **Decision:** the API key field in Settings (stored in the Keychain) is built in M3, so Claude can be tried as soon as classification exists. M5 adds the welcome-screen key step and the remaining Settings.
 
 ## 8. Testing and how you'll run it
 
