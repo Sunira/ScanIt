@@ -39,31 +39,47 @@ enum PageDetector {
         }
     }
 
+    /// How readily a page is accepted. Trimming a finished photo is cautious, since a wrong
+    /// crop loses content; the live outline is eager, so a page is found from arm's length.
+    struct Sensitivity: Sendable {
+        /// Smallest share of the frame a page may fill.
+        var minimumArea: CGFloat
+        /// Lowest confidence for the rectangle fallback.
+        var rectangleConfidence: Float
+        /// Lowest confidence for document segmentation.
+        var segmentationConfidence: Float
+
+        static let trimming = Sensitivity(minimumArea: 0.2, rectangleConfidence: 0.75, segmentationConfidence: 0.5)
+        static let live = Sensitivity(minimumArea: 0.04, rectangleConfidence: 0.5, segmentationConfidence: 0.3)
+    }
+
     /// Picks the page from Vision's candidates: the largest confident one that
     /// isn't simply the whole frame (in which case there's nothing to trim).
-    static func bestCandidate(_ candidates: [(quad: Quad, confidence: Float)], minimumConfidence: Float = 0.75) -> Quad? {
+    static func bestCandidate(_ candidates: [(quad: Quad, confidence: Float)], minimumConfidence: Float = 0.75,
+                              minimumArea: CGFloat = 0.2) -> Quad? {
         candidates
-            .filter { $0.confidence >= minimumConfidence && $0.quad.area >= 0.2 && $0.quad.area <= 0.97 }
+            .filter { $0.confidence >= minimumConfidence && $0.quad.area >= minimumArea && $0.quad.area <= 0.97 }
             .max { $0.quad.area < $1.quad.area }?
             .quad
     }
 
     /// The same detection on a live camera frame (the scan screen's overlay uses it).
     static func detectPage(in pixelBuffer: CVPixelBuffer, orientation: CGImagePropertyOrientation) -> Quad? {
-        detectPage(with: VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: orientation))
+        detectPage(with: VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: orientation), sensitivity: .live)
     }
 
     private static func detectPage(in cgImage: CGImage) -> Quad? {
-        detectPage(with: VNImageRequestHandler(cgImage: cgImage, orientation: .up))
+        detectPage(with: VNImageRequestHandler(cgImage: cgImage, orientation: .up), sensitivity: .trimming)
     }
 
     /// Apple's document segmentation (the model behind VisionKit's scanner) first,
     /// since it copes with low contrast and busy tables; plain edge-based
     /// rectangle detection only when it finds nothing.
-    private static func detectPage(with handler: VNImageRequestHandler) -> Quad? {
+    private static func detectPage(with handler: VNImageRequestHandler, sensitivity: Sensitivity) -> Quad? {
         let document = VNDetectDocumentSegmentationRequest()
         if (try? handler.perform([document])) != nil,
-           let quad = bestCandidate(candidates(from: document.results), minimumConfidence: 0.5) {
+           let quad = bestCandidate(candidates(from: document.results), minimumConfidence: sensitivity.segmentationConfidence,
+                                  minimumArea: sensitivity.minimumArea) {
             return quad
         }
 
@@ -71,13 +87,14 @@ enum PageDetector {
         // Letter and A4 pages are about 0.7 (short side / long side); allow tall receipts and near-square forms.
         request.minimumAspectRatio = 0.3
         request.maximumAspectRatio = 1.0
-        request.minimumSize = 0.25
-        request.minimumConfidence = 0.6
+        request.minimumSize = Float(sensitivity.minimumArea.squareRoot() * 0.8)
+        request.minimumConfidence = min(0.6, sensitivity.rectangleConfidence)
         request.quadratureTolerance = 20
         request.maximumObservations = 6
 
         guard (try? handler.perform([request])) != nil else { return nil }
-        return bestCandidate(candidates(from: request.results))
+        return bestCandidate(candidates(from: request.results), minimumConfidence: sensitivity.rectangleConfidence,
+                             minimumArea: sensitivity.minimumArea)
     }
 
     private static func candidates(from observations: [VNRectangleObservation]?) -> [(quad: Quad, confidence: Float)] {

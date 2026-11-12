@@ -60,3 +60,18 @@ struct QuadSmootherTests {
         #expect(!turned)
     }
 }
+
+struct LiveSensitivityTests {
+    private func quad(inset: CGFloat) -> PageDetector.Quad {
+        PageDetector.Quad(topLeft: CGPoint(x: inset, y: 1 - inset), topRight: CGPoint(x: 1 - inset, y: 1 - inset),
+                          bottomRight: CGPoint(x: 1 - inset, y: inset), bottomLeft: CGPoint(x: inset, y: inset))
+    }
+
+    @Test func liveOutlineFindsAPageHeldFarAway() {
+        let far = quad(inset: 0.35)  // fills about 9% of the frame
+        let live = PageDetector.Sensitivity.live
+        #expect(PageDetector.bestCandidate([(far, 0.6)], minimumConfidence: live.rectangleConfidence,
+                                           minimumArea: live.minimumArea) == far)
+        #expect(PageDetector.bestCandidate([(far, 0.6)]) == nil)  // trimming stays cautious
+    }
+}
